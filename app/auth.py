@@ -1,0 +1,29 @@
+from flask import Blueprint, redirect, request, url_for, render_template
+from flask_login import login_user
+
+from app.models import User
+from .extensions import login_manager
+# from flask_login import 
+
+auth_bp = Blueprint("auth", __name__)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+@auth_bp.route('/')
+
+def inicio():
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/login', methods = ['GET', 'POST'])
+def login():
+    usuario = User.query.filter_by(
+        username = request.form.get("nombre_usuario")
+    ).first()
+    
+    if usuario and usuario.check_password(request.form.get("contrasenia")):
+        login_user(usuario)
+        return redirect("/admin")
+    
+    return render_template("login.html")
