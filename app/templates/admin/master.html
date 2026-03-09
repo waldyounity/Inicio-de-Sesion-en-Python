@@ -1,0 +1,21 @@
+{% extends 'admin/base.html' %}
+
+{% block access_control %}
+    {% if current_user.is_authenticated %}
+        <ul class="navbar-nav ml-auto align-items-center">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="perfilDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&background=0D8ABC&color=fff&rounded=true&size=32" alt="Avatar" class="mr-2 shadow-sm rounded-circle">
+                    <strong>{{ current_user.username }}</strong>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="perfilDropdown">
+                    <a class="dropdown-item" href="#">⚙️ Cambiar Contraseña</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                        <strong>❌ Cerrar Sesión</strong>
+                    </a>
+                </div>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}

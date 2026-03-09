@@ -2,29 +2,31 @@ from flask_login import current_user
 from flask import redirect, url_for
 from flask_admin.contrib.sqla import ModelView
 from .extensions import admin, db
-from .models import Producto, User
-#importamos el menu de inicio de sesion
-from flask_admin.menu import MenuLink
+from .models import User
 
-class SecurityModelView(ModelView):
-    colum_exclude_list = ["password"]
+# --- Clase para la Gestión de Personal (SOLO ADMIN) ---
+class AdminModelView(ModelView):
+    # Corregí un pequeño detalle aquí: es column_exclude_list (con 'n')
+    column_exclude_list = ["password"] 
     
     def is_accessible(self):
-        return current_user.is_authenticated
+        # LA MAGIA: Solo entra si está logueado Y su rol es admin
+        return current_user.is_authenticated and current_user.role == 'admin'
     
-    def inaccessible_callback(self, name, ):
+    def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("auth.login"))
     
-    #agregamos una funcion para que se encripte el password al crearse
+    # Encriptamos el password al crearse
     def on_model_change(self, form, model, is_created):
-        # Si se escribió una contraseña en el formulario, la encriptamos antes de guardar
-        if form.password.data:
+        if hasattr(form, 'password') and form.password.data:
             model.set_password(form.password.data)
+            
+    # Activar Modales
+    create_modal = True
+    edit_modal = True
+    can_view_details = True
+    details_modal = True
     
 def configuracion_admin():
-    admin.add_view(SecurityModelView(User, db.session))
-    #mostramos la tabla creada en las pesatañas
-    admin.add_view(SecurityModelView(Producto, db.session))
-    
-    #agregamos el boton de cerrar sesion
-    admin.add_link(MenuLink(name='Cerrar Sesión', category='', url='/logout'))
+    # Solo mostramos la tabla de usuarios protegida
+    admin.add_view(AdminModelView(User, db.session, name="Gestión de Personal"))
